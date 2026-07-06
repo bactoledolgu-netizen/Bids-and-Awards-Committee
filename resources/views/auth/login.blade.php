@@ -5,8 +5,8 @@
     <div class="auth-panel">
         <div class="auth-header">
             <div class="auth-logo"></div>
-            <h1 class="auth-title">BAC Minutes and Attendance Management System</h1>
-            <p class="auth-subtitle">Bids and Awards Committee — Toledo City Hall</p>
+            <h1 class="auth-title">Bidding and Awards Committee</h1>
+            <p class="auth-subtitle">Toledo City Hall</p>
         </div>
 
         @if ($errors->any())
@@ -16,12 +16,12 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}" novalidate x-data="{ showPassword: false }">
+        <form method="POST" action="{{ route('login') }}" novalidate x-data="{ showPassword: false }" autocomplete="off">
             @csrf
 
             <div class="form-group">
                 <label for="username">Username</label>
-                <input id="username" name="username" type="text" required autofocus autocomplete="username" value="{{ old('username') }}" />
+                <input id="username" name="username" type="text" required autofocus autocomplete="username" value="" />
             </div>
 
             <div class="form-group password-field">

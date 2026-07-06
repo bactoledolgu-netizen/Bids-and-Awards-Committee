@@ -8,6 +8,14 @@
     @vite(['resources/css/app.css', 'resources/css/auth.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-800">
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            const nav = window.performance && window.performance.getEntriesByType('navigation')[0];
+            if (event.persisted || (nav && nav.type === 'back_forward')) {
+                window.location.reload();
+            }
+        });
+    </script>
     <div class="flex h-screen bg-[radial-gradient(circle_at_top_left,_rgba(15,27,61,0.06),_transparent_35%)]">
         <aside class="flex w-72 flex-col border-r border-slate-200 bg-white/80  shadow-sm backdrop-blur">
             <div class="mb-8 bg-[#0f1b3d] px-4 py-6 text-center text-white shadow-sm">
@@ -28,14 +36,14 @@
                     </li>
                     <li>
                         <a href="{{ route('attendance.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('attendance.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
-                            <span class="mr-3 text-base">☰</span>
+                            <span class="mr-3 text-base">📅</span>
                             Attendance
                         </a>
                     </li>
                     <li>
                         <a href="#" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition">
                             <span class="mr-3 text-base">📄</span>
-                            Documents (coming)
+                            Minutes Documents (coming)
                         </a>
                     </li>
                     <li>
