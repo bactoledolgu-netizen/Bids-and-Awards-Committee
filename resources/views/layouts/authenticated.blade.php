@@ -7,51 +7,62 @@
     <title>{{ config('app.name', 'BAC Minutes and Attendance Management System') }}</title>
     @vite(['resources/css/app.css', 'resources/css/auth.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-    <div class="flex h-screen">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-4 flex flex-col">
-            <div class="mb-6">
-                <div class="text-lg font-semibold">BAC Minutes & Attendance</div>
-                <div class="text-xs text-gray-500">Toledo City Hall</div>
+<body class="min-h-screen bg-slate-100 text-slate-800">
+    <div class="flex h-screen bg-[radial-gradient(circle_at_top_left,_rgba(15,27,61,0.06),_transparent_35%)]">
+        <aside class="flex w-72 flex-col border-r border-slate-200 bg-white/80  shadow-sm backdrop-blur">
+            <div class="mb-8 bg-[#0f1b3d] px-4 py-6 text-center text-white shadow-sm">
+                <div class="inline-flex items-center text-center rounded-full bg-[#0f1b3d] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white">
+                    Bidding and Awards Committee Office
+                </div>
+                <!-- <div class="mt-4 text-lg font-semibold text-slate-900">Bidding and Awards Committee</div> -->
+                <div class="text-sm text-slate-500 text-center text text-white" >Toledo City Hall</div>
             </div>
 
-            <!-- <div class="mb-6">
-                <div class="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">{{ strtoupper(substr(auth()->user()->name,0,1)) }}</div>
-                <div class="mt-2 text-sm font-medium">{{ auth()->user()->name }}</div>
-                <div class="text-xs text-gray-500">{{ auth()->user()->position_title ?? 'Administrator' }}</div>
-                <div class="text-xs text-gray-400">{{ '@' . auth()->user()->username }}</div>
-            </div> -->
-
             <nav class="flex-1">
-                <ul class="space-y-1">
+                <ul class="space-y-2">
                     <li>
-                        <a href="{{ route('dashboard') }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('dashboard') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <span class="mr-3 text-base">▤</span>
+                            Dashboard
+                        </a>
                     </li>
                     <li>
-                        <a href="{{ route('attendance.index') }}" class="block px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700">Attendance</a>
+                        <a href="{{ route('attendance.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('attendance.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <span class="mr-3 text-base">☰</span>
+                            Attendance
+                        </a>
                     </li>
                     <li>
-                        <a href="#" class="block px-3 py-2 rounded text-gray-400">Documents (coming)</a>
+                        <a href="#" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition">
+                            <span class="mr-3 text-base">📄</span>
+                            Documents (coming)
+                        </a>
                     </li>
                     <li>
-                        <a href="#" class="block px-3 py-2 rounded text-gray-400">Archives (coming)</a>
+                        <a href="#" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition">
+                            <span class="mr-3 text-base">🗂️</span>
+                            Archives (coming)
+                        </a>
                     </li>
                 </ul>
             </nav>
 
-            <div class="mt-4">
+            <div class="mt-2 p-4">
+                <!-- <div class="mb-2 text-sm font-semibold text-slate-700">Need a quick exit?</div> -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full bg-red-600 text-white px-3 py-2 rounded">Logout</button>
+                    <button type="submit" class="w-full rounded-xl bg-rose-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-rose-700">
+                        Logout
+                    </button>
                 </form>
             </div>
         </aside>
 
-        <!-- Main content -->
-        <div class="flex-1 overflow-auto p-6">
-            @yield('content')
-        </div>
+        <main class="flex-1 overflow-auto p-6 lg:p-8">
+            <div class="mx-auto max-w-7xl">
+                @yield('content')
+            </div>
+        </main>
     </div>
 </body>
 </html>

@@ -14,6 +14,7 @@ Route::middleware(['auth'])->prefix('attendance')->name('attendance.')->group(fu
     Route::delete('/{folder}', [AttendanceFolderController::class, 'destroy'])->name('destroy');
 
     Route::post('/{folder}/files', [AttendanceFileController::class, 'store'])->name('files.store');
+    Route::post('/{folder}/files/reorder', [AttendanceFileController::class, 'reorder'])->name('files.reorder');
     Route::get('/{folder}/files/{file}', [AttendanceFileController::class, 'show'])->name('files.show');
     Route::delete('/{folder}/files/{file}', [AttendanceFileController::class, 'destroy'])->name('files.destroy');
 });

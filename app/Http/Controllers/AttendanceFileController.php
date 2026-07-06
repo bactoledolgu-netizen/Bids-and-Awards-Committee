@@ -20,6 +20,8 @@ class AttendanceFileController extends Controller
             $stored = "attendance/{$folder->id}/{$uuid}.{$ext}";
             Storage::disk('local')->putFileAs("attendance/{$folder->id}", $file, "{$uuid}.{$ext}");
 
+            $nextOrder = AttendanceFile::where('attendance_folder_id', $folder->id)->max('sort_order') ?? 0;
+
             $af = AttendanceFile::create([
                 'attendance_folder_id' => $folder->id,
                 'original_filename' => $file->getClientOriginalName(),
@@ -27,6 +29,7 @@ class AttendanceFileController extends Controller
                 'mime_type' => $file->getClientMimeType(),
                 'file_size' => $file->getSize(),
                 'uploaded_by' => auth()->id(),
+                'sort_order' => $nextOrder + 1,
             ]);
 
             $uploaded[] = $af;
@@ -58,5 +61,18 @@ class AttendanceFileController extends Controller
         $file->delete();
 
         return redirect()->route('attendance.show', $folder)->with('success','File deleted.');
+    }
+
+    public function reorder(Request $request, AttendanceFolder $folder)
+    {
+        $order = $request->input('order', []);
+
+        foreach ($order as $index => $fileId) {
+            AttendanceFile::where('attendance_folder_id', $folder->id)
+                ->where('id', $fileId)
+                ->update(['sort_order' => $index + 1]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }
