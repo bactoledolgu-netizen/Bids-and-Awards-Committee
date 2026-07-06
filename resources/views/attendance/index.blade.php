@@ -20,7 +20,7 @@
             <section>
                 <div class="mb-3 flex items-center gap-3">
                     <h3 class="text-lg font-semibold text-slate-800">Year {{ $year }}</h3>
-                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{{ $yearFolders->count() }} folders</span>
+                    <span class="rounded-full py-1 text-xs font-medium text-slate-600 ">{{ $yearFolders->count() }} folders</span>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -43,8 +43,8 @@
                             <a href="{{ route('attendance.show', $folder) }}" class="block cursor-pointer rounded-3xl p-2 transition hover:bg-gray-50">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="min-w-0">
-                                        <div class="font-bold text-lg text-gray-900">{{ $folder->name }}</div>
-                                        <div class="text-sm text-gray-500">
+                                        <div class="text-sm text-gray-500">{{ $folder->name }}</div>
+                                        <div class="font-bold text-lg text-gray-900">
                                             @if($folder->folder_date_end)
                                                 {{ $folder->folder_date->format('F Y') }} - {{ $folder->folder_date_end->format('F Y') }}
                                             @else
