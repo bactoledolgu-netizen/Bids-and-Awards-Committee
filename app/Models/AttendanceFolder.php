@@ -10,10 +10,11 @@ class AttendanceFolder extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name','folder_date','description','venue','created_by','parent_id'];
+    protected $fillable = ['name','folder_date','folder_date_end','description','venue','created_by','parent_id'];
 
     protected $casts = [
         'folder_date' => 'date',
+        'folder_date_end' => 'date',
     ];
 
     public function files()

@@ -6,20 +6,34 @@ use App\Http\Requests\StoreAttendanceFolderRequest;
 use App\Http\Requests\UpdateAttendanceFolderRequest;
 use App\Models\AttendanceFolder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class AttendanceFolderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = AttendanceFolder::whereNull('parent_id')->latest();
+        $query = AttendanceFolder::whereNull('parent_id');
 
         if ($search = $request->input('q')) {
             $query->where('name', 'like', "%{$search}%");
         }
 
-        $folders = $query->paginate(12);
+        $folders = $query->get()->sortByDesc(function ($folder) {
+            return optional($folder->folder_date)->format('Y-m-d') ?? $folder->created_at->format('Y-m-d');
+        })->values();
 
-        return view('attendance.index', compact('folders'));
+        $groupedFolders = $folders
+            ->groupBy(function ($folder) {
+                return optional($folder->folder_date)->year ?? $folder->created_at->year;
+            })
+            ->map(function ($yearFolders) {
+                return $yearFolders->sortByDesc(function ($folder) {
+                    return optional($folder->folder_date)->format('Y-m-d') ?? $folder->created_at->format('Y-m-d');
+                })->values();
+            })
+            ->sortKeysDesc();
+
+        return view('attendance.index', compact('groupedFolders'));
     }
 
     public function create()
@@ -31,10 +45,26 @@ class AttendanceFolderController extends Controller
     {
         $data = $request->validated();
         $data['created_by'] = auth()->id();
-        $data['folder_date'] = $data['folder_date'] ?? now()->toDateString();
+
+        if (! empty($data['start_month']) && ! empty($data['start_year'])) {
+            $data['folder_date'] = now()->setDate($data['start_year'], $data['start_month'], 1)->toDateString();
+        } else {
+            $data['folder_date'] = $data['folder_date'] ?? now()->toDateString();
+        }
+
+        if (Schema::hasColumn('attendance_folders', 'folder_date_end')) {
+            if (! empty($data['end_month']) && ! empty($data['end_year'])) {
+                $data['folder_date_end'] = now()->setDate($data['end_year'], $data['end_month'], 1)->endOfMonth()->toDateString();
+            } elseif (! empty($data['folder_date'])) {
+                $data['folder_date_end'] = null;
+            }
+        }
+
+        unset($data['start_month'], $data['start_year'], $data['end_month'], $data['end_year']);
+
         $folder = AttendanceFolder::create($data);
 
-        return redirect()->route('attendance.show', $folder)->with('success', 'Folder created.');
+        return redirect()->route('attendance.index')->with('success', 'Folder created.');
     }
 
     public function show(AttendanceFolder $folder)
@@ -52,8 +82,25 @@ class AttendanceFolderController extends Controller
 
     public function update(UpdateAttendanceFolderRequest $request, AttendanceFolder $folder)
     {
-        $folder->update($request->validated());
-        return redirect()->route('attendance.show', $folder)->with('success','Folder updated.');
+        $data = $request->validated();
+
+        if (! empty($data['start_month']) && ! empty($data['start_year'])) {
+            $data['folder_date'] = now()->setDate($data['start_year'], $data['start_month'], 1)->toDateString();
+        }
+
+        if (Schema::hasColumn('attendance_folders', 'folder_date_end')) {
+            if (! empty($data['end_month']) && ! empty($data['end_year'])) {
+                $data['folder_date_end'] = now()->setDate($data['end_year'], $data['end_month'], 1)->endOfMonth()->toDateString();
+            } elseif (array_key_exists('end_month', $data) && array_key_exists('end_year', $data)) {
+                $data['folder_date_end'] = null;
+            }
+        }
+
+        unset($data['start_month'], $data['start_year'], $data['end_month'], $data['end_year']);
+
+        $folder->update($data);
+
+        return redirect()->route('attendance.index')->with('success','Folder updated.');
     }
 
     public function destroy(AttendanceFolder $folder)
