@@ -6,7 +6,7 @@
 <div class="max-w-7xl mx-auto space-y-6">
     <!-- Welcome banner -->
     <div class="bg-[#0f2a57] text-white rounded-xl p-6 flex items-center gap-6">
-        <div class="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-2xl font-bold">TC</div>
+        <!-- <div class="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-2xl font-bold">TC</div> -->
         <div class="flex-1">
             <!-- <div class="text-sm uppercase text-yellow-300">Welcome back</div> -->
             <div class="text-2xl font-semibold">{{ auth()->user()->name }}</div>
@@ -19,36 +19,43 @@
     </div>
 
     <!-- Stats cards -->
+    @php($stats = $stats ?? [
+        'folders' => 0,
+        'filesThisYear' => 0,
+        'filesThisMonth' => 0,
+        'files' => 0,
+        'archivedFolders' => 0,
+    ])
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-xs text-gray-400">Total Documents</div>
-            <div class="text-2xl font-bold mt-2">247</div>
-            <div class="text-xs text-gray-400 mt-1">All years combined</div>
+            <div class="text-xs text-gray-400">Total Folders</div>
+            <div class="text-2xl font-bold mt-2">{{ $stats['folders'] }}</div>
+            <div class="text-xs text-gray-400 mt-1">All attendance folders</div>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <div class="text-xs text-gray-400">Uploaded This Year</div>
-            <div class="text-2xl font-bold mt-2">38</div>
-            <div class="text-xs text-gray-400 mt-1">2026 — Jan to Jul</div>
+            <div class="text-2xl font-bold mt-2">{{ $stats['filesThisYear'] }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ now()->format('Y') }} — Jan to {{ now()->format('M') }}</div>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <div class="text-xs text-gray-400">This Month</div>
-            <div class="text-2xl font-bold mt-2">7</div>
-            <div class="text-xs text-gray-400 mt-1">July 2026</div>
+            <div class="text-2xl font-bold mt-2">{{ $stats['filesThisMonth'] }}</div>
+            <div class="text-xs text-gray-400 mt-1">{{ now()->format('F Y') }}</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-xs text-gray-400">Total Files</div>
+            <div class="text-2xl font-bold mt-2">{{ $stats['files'] }}</div>
+            <div class="text-xs text-gray-400 mt-1">Across all folders</div>
+        </div>
+        <div class="bg-white rounded-xl shadow p-4">
+            <div class="text-xs text-gray-400">Archived Folders</div>
+            <div class="text-2xl font-bold mt-2">{{ $stats['archivedFolders'] }}</div>
+            <div class="text-xs text-gray-400 mt-1">Soft-deleted folders</div>
         </div>
         <div class="bg-white rounded-xl shadow p-4">
             <div class="text-xs text-gray-400">Storage Used</div>
-            <div class="text-2xl font-bold mt-2">2.4 GB</div>
-            <div class="text-xs text-gray-400 mt-1">of 10 GB (24%)</div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-xs text-gray-400">Pending Review</div>
-            <div class="text-2xl font-bold mt-2">3</div>
-            <div class="text-xs text-gray-400 mt-1">Awaiting final approval</div>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <div class="text-xs text-gray-400">Archived Docs</div>
-            <div class="text-2xl font-bold mt-2">51</div>
-            <div class="text-xs text-gray-400 mt-1">From previous years</div>
+            <div class="text-2xl font-bold mt-2">{{ number_format($stats['files'] > 0 ? ($stats['files'] * 0.5) : 0, 1) }} MB</div>
+            <div class="text-xs text-gray-400 mt-1">Based on current file count</div>
         </div>
     </div>
 

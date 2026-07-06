@@ -8,6 +8,13 @@
     @vite(['resources/css/auth.css','resources/js/app.js'])
 </head>
 <body class="auth-page">
+    <script>
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted || (window.performance && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward')) {
+                window.location.reload();
+            }
+        });
+    </script>
     <div class="auth-shell">
         @yield('content')
     </div>

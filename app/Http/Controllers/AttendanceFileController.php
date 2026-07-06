@@ -63,6 +63,24 @@ class AttendanceFileController extends Controller
         return redirect()->route('attendance.show', $folder)->with('success','File deleted.');
     }
 
+    public function bulkDestroy(Request $request, AttendanceFolder $folder)
+    {
+        $fileIds = $request->input('file_ids', []);
+
+        if (!empty($fileIds)) {
+            $files = AttendanceFile::where('attendance_folder_id', $folder->id)
+                ->whereIn('id', $fileIds)
+                ->get();
+
+            foreach ($files as $file) {
+                Storage::disk('local')->delete($file->stored_path);
+                $file->delete();
+            }
+        }
+
+        return redirect()->route('attendance.show', $folder)->with('success','Selected files deleted.');
+    }
+
     public function reorder(Request $request, AttendanceFolder $folder)
     {
         $order = $request->input('order', []);

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\AttendanceFile;
 use App\Models\AttendanceFolder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,5 +71,47 @@ class AttendanceFolderTest extends TestCase
         $response->assertSee('Year 2026');
         $response->assertSee('Year 2024');
         $response->assertSeeInOrder(['Year 2026', 'Newest Folder', 'Newer Folder', 'Year 2024', 'Older Folder']);
+    }
+
+    public function test_user_can_bulk_delete_selected_files(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $folder = AttendanceFolder::create([
+            'name' => 'Bulk Delete Folder',
+            'description' => 'Test bulk delete',
+            'created_by' => $user->id,
+            'folder_date' => '2026-01-01',
+            'folder_date_end' => '2026-01-31',
+        ]);
+
+        $firstFile = AttendanceFile::create([
+            'attendance_folder_id' => $folder->id,
+            'original_filename' => 'one.pdf',
+            'stored_path' => 'attendance/' . $folder->id . '/one.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 1024,
+            'uploaded_by' => $user->id,
+            'sort_order' => 1,
+        ]);
+
+        $secondFile = AttendanceFile::create([
+            'attendance_folder_id' => $folder->id,
+            'original_filename' => 'two.pdf',
+            'stored_path' => 'attendance/' . $folder->id . '/two.pdf',
+            'mime_type' => 'application/pdf',
+            'file_size' => 1024,
+            'uploaded_by' => $user->id,
+            'sort_order' => 2,
+        ]);
+
+        $response = $this->delete(route('attendance.files.bulk-destroy', $folder), [
+            'file_ids' => [$firstFile->id, $secondFile->id],
+        ]);
+
+        $response->assertRedirect(route('attendance.show', $folder));
+        $this->assertDatabaseMissing('attendance_files', ['id' => $firstFile->id]);
+        $this->assertDatabaseMissing('attendance_files', ['id' => $secondFile->id]);
     }
 }
