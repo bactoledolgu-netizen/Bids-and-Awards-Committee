@@ -26,7 +26,11 @@
             <button class="flex items-center gap-3 p-3 rounded-md opacity-60 cursor-not-allowed">🔔 Notifications</button>
             <button class="flex items-center gap-3 p-3 rounded-md opacity-60 cursor-not-allowed">📜 Activity Logs</button>
             <button class="flex items-center gap-3 p-3 rounded-md opacity-60 cursor-not-allowed">👥 User Management</button>
-            <button class="flex items-center gap-3 p-3 rounded-md opacity-60 cursor-not-allowed">⚙ Settings</button>
+            @if (auth()->user()->isAdmin())
+                <a href="{{ route('settings.index') }}" class="flex items-center gap-3 p-3 rounded-md hover:bg-[#13203a] {{ request()->routeIs('settings.*') ? 'bg-[#13203a] border-l-4 border-yellow-400' : ''}}">⚙ Settings</a>
+            @else
+                <button class="flex items-center gap-3 p-3 rounded-md opacity-60 cursor-not-allowed">⚙ Settings</button>
+            @endif
         </nav>
 
         <div class="p-4 border-t border-[#13203a]">
