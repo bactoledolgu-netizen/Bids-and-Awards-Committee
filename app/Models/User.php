@@ -31,4 +31,9 @@ class User extends Authenticatable
             'failed_login_attempts' => 'integer',
         ];
     }
+
+    public function isAdmin(): bool
+    {
+        return $this->username === 'admin' || str_contains(strtolower($this->position_title ?? ''), 'admin');
+    }
 }

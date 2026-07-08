@@ -8,13 +8,13 @@
     $oldVerifyUrl = $oldFileId ? $folder->files->firstWhere('id', $oldFileId) : null;
 @endphp
 
-<div x-data="{ openEdit: {{ $errors->any() ? 'true' : 'false' }}, openAction: null, openAddFolder: false, openAddFiles: false, openPasswordModal: {{ $oldFileId ? 'true' : 'false' }}, passwordVerifyUrl: {{ $oldVerifyUrl ? json_encode(route('attendance.files.verify', [$folder, $oldVerifyUrl])) : 'null' }}, submitting: false, draggingId: null, reorderUrl: '{{ route('attendance.files.reorder', $folder) }}' }" @keydown.escape.window="openEdit = false; openAction = null; openAddFolder = false; openAddFiles = false; openPasswordModal = false" class="max-w-5xl mx-auto">
+<div x-data="{ openEdit: {{ $errors->any() ? 'true' : 'false' }}, openAction: null, openAddFolder: false, openAddFiles: false, openPasswordModal: {{ $oldFileId ? 'true' : 'false' }}, passwordVerifyUrl: {{ $oldVerifyUrl ? json_encode(route('minutes.files.verify', [$folder, $oldVerifyUrl])) : 'null' }}, submitting: false, draggingId: null, reorderUrl: '{{ route('minutes.files.reorder', $folder) }}' }" @keydown.escape.window="openEdit = false; openAction = null; openAddFolder = false; openAddFiles = false; openPasswordModal = false" class="max-w-5xl mx-auto">
     <div class="mb-4">
         <nav class="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('attendance.index') }}" class="text-blue-600 hover:underline">Attendance</a>
+            <a href="{{ route('minutes.index') }}" class="text-blue-600 hover:underline">Minutes</a>
             @foreach ($ancestors as $ancestor)
                 <span>/</span>
-                <a href="{{ route('attendance.show', $ancestor) }}" class="text-blue-600 hover:underline">{{ $ancestor->name }}</a>
+                <a href="{{ route('minutes.show', $ancestor) }}" class="text-blue-600 hover:underline">{{ $ancestor->name }}</a>
             @endforeach
             <span>/</span>
             <span class="text-gray-900">{{ $folder->name }}</span>
@@ -59,12 +59,12 @@
                     {{ session('warning') }}
                 </div>
             @endif
-            @if($errors->has('attendance_password'))
+            @if($errors->has('minutes_password'))
                 <div class="mb-4 rounded-2xl bg-red-50 border border-red-200 p-4 text-red-800">
-                    {{ $errors->first('attendance_password') }}
+                    {{ $errors->first('minutes_password') }}
                 </div>
             @endif
-            <form method="POST" action="{{ route('attendance.files.bulk-destroy', $folder) }}" onsubmit="return confirm('Delete selected files?')" class="space-y-3">
+            <form method="POST" action="{{ route('minutes.files.bulk-destroy', $folder) }}" onsubmit="return confirm('Delete selected files?')" class="space-y-3">
                 @csrf
                 @method('DELETE')
                 <div class="mb-3 flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
@@ -92,7 +92,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
-                                <button type="button" @click="passwordVerifyUrl = '{{ route('attendance.files.verify', [$folder, $file]) }}'; openPasswordModal = true" class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50">View</button>
+                                <button type="button" @click="passwordVerifyUrl = '{{ route('minutes.files.verify', [$folder, $file]) }}'; openPasswordModal = true" class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50">View</button>
                             </div>
                         </div>
                     @endforeach
@@ -107,12 +107,12 @@
             <div class="flex items-center justify-between px-6 py-5 border-b border-gray-200">
                 <div>
                     <h3 class="text-xl font-semibold">Upload Files</h3>
-                    <p class="text-sm text-gray-500">Add files to this folder for BAC attendance records.</p>
+                    <p class="text-sm text-gray-500">Add files to this folder for BAC minutes records.</p>
                 </div>
                 <button type="button" @click="openAddFiles = false" class="text-gray-500 hover:text-gray-900">Close</button>
             </div>
 
-            <form action="{{ route('attendance.files.store', $folder) }}" method="POST" enctype="multipart/form-data" @submit.prevent="if (!submitting) { submitting = true; $event.target.submit() }" class="space-y-4 px-6 py-6">
+            <form action="{{ route('minutes.files.store', $folder) }}" method="POST" enctype="multipart/form-data" @submit.prevent="if (!submitting) { submitting = true; $event.target.submit() }" class="space-y-4 px-6 py-6">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Choose files</label>
@@ -131,13 +131,13 @@
         <div class="absolute inset-0" @click="openPasswordModal = false"></div>
         <div class="relative w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-200">
-                <h3 class="text-xl font-semibold">Enter Attendance Password</h3>
-                <p class="text-sm text-gray-500">This file is protected. Please enter the global attendance password to continue.</p>
+                <h3 class="text-xl font-semibold">Enter Minutes Password</h3>
+                <p class="text-sm text-gray-500">This file is protected. Please enter the global minutes password to continue.</p>
             </div>
             <form :action="passwordVerifyUrl" method="POST" class="space-y-4 px-6 py-6">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Attendance Password</label>
+                    <label class="block text-sm font-medium text-gray-700">Minutes Password</label>
                     <input type="password" name="attendance_password" required class="mt-3 block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 focus:border-[#0f1b3d] focus:outline-none focus:ring-2 focus:ring-[#0f1b3d]/20" />
                 </div>
                 <div class="flex justify-end gap-3">

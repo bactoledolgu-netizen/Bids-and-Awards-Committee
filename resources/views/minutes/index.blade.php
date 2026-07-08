@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
-@section('page-title','Attendance')
+@section('page-title','Minutes')
 
 @section('content')
 <div x-data="{ open: {{ $errors->any() ? 'true' : 'false' }}, submitting: false, search: '' }" @keydown.escape.window="open = false" class="max-w-6xl mx-auto">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
-        <h2 class="text-2xl font-bold">Attendance</h2>
+        <h2 class="text-2xl font-bold">Minutes</h2>
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-3">
             <div class="relative min-w-[280px]">
                 <input x-model.debounce.200ms="search" type="search" placeholder="Search folders by name or date" class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-indigo-600 focus:ring-indigo-600" />
@@ -32,7 +32,7 @@
                                 </button>
                                 <div x-show="menuOpen" x-cloak @click.outside="menuOpen = false" class="absolute right-0 mt-2 w-36 rounded-2xl border border-gray-200 bg-white shadow-lg overflow-hidden">
                                     <button @click="renameOpen = true; menuOpen = false" class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100">Rename</button>
-                                    <form method="POST" action="{{ route('attendance.destroy', $folder) }}" onsubmit="return confirm('Delete folder?')">
+                                    <form method="POST" action="{{ route('minutes.destroy', $folder) }}" onsubmit="return confirm('Delete folder?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-100">Delete</button>
@@ -40,7 +40,7 @@
                                 </div>
                             </div>
 
-                            <a href="{{ route('attendance.show', $folder) }}" class="block cursor-pointer rounded-3xl p-2 transition hover:bg-gray-50">
+                            <a href="{{ route('minutes.show', $folder) }}" class="block cursor-pointer rounded-3xl p-2 transition hover:bg-gray-50">
                                 <div class="flex items-start justify-between gap-4">
                                     <div class="min-w-0">
                                         <div class="text-sm text-gray-500">{{ $folder->name }}</div>
@@ -67,7 +67,7 @@
                                         <button type="button" @click="renameOpen = false" class="text-gray-500 hover:text-gray-900">Close</button>
                                     </div>
 
-                                    <form method="POST" action="{{ route('attendance.update', $folder) }}" @submit.prevent="if (!submittingRename) { submittingRename = true; $event.target.submit() }" class="space-y-4 px-6 py-6">
+                                    <form method="POST" action="{{ route('minutes.update', $folder) }}" @submit.prevent="if (!submittingRename) { submittingRename = true; $event.target.submit() }" class="space-y-4 px-6 py-6">
                                         @csrf
                                         @method('PUT')
 
@@ -125,7 +125,7 @@
         @empty
             <div class="bg-white rounded-xl shadow p-8 text-center">
                 <div class="text-lg font-semibold">No folders yet</div>
-                <p class="text-sm text-gray-500 mt-2">Create your first attendance folder to upload files.</p>
+                <p class="text-sm text-gray-500 mt-2">Create your first minutes folder to upload files.</p>
                 <button @click.prevent="open = true" class="mt-4 inline-block bg-[#0f1b3d] text-white px-4 py-2 rounded">Create your first folder</button>
             </div>
         @endforelse
@@ -141,7 +141,7 @@
         <div class="relative w-full max-w-2xl rounded-3xl bg-white shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-6 py-5 border-b border-gray-200">
                 <div>
-                    <h3 class="text-xl font-semibold">Create Attendance Folder</h3>
+                    <h3 class="text-xl font-semibold">Create Minutes Folder</h3>
                     <!-- <p class="text-sm text-gray-500">Enter folder details and save once to avoid duplicates.</p> -->
                 </div>
                 <button type="button" @click="open = false" class="text-gray-500 hover:text-gray-900">Close</button>
@@ -149,7 +149,7 @@
 
             <form
                 method="POST"
-                action="{{ route('attendance.store') }}"
+                action="{{ route('minutes.store') }}"
                 @submit.prevent="if (!submitting) { submitting = true; $event.target.submit() }"
                 class="space-y-4 px-6 py-6"
             >
@@ -171,10 +171,6 @@
                         <label class="block text-sm font-medium text-gray-700">Name</label>
                         <input name="name" value="{{ old('name') }}" required class="mt-1 block w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-indigo-600 focus:ring-indigo-600" />
                     </div>
-                    <!-- <div>
-                        <label class="block text-sm font-medium text-gray-700">Date</label>
-                        <input type="date" name="folder_date" value="{{ old('folder_date') }}" required class="mt-1 block w-full rounded-xl border border-gray-300 px-3 py-2 focus:border-indigo-600 focus:ring-indigo-600" />
-                    </div> -->
                 </div>
 
                 <div class="grid gap-4 lg:grid-cols-2">

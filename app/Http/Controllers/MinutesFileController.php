@@ -2,30 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreAttendanceFileRequest;
-use App\Models\AttendanceFolder;
-use App\Models\AttendanceFile;
+use App\Http\Requests\StoreMinutesFileRequest;
+use App\Models\MinutesFolder;
+use App\Models\MinutesFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Setting;
 
-class AttendanceFileController extends Controller
+class MinutesFileController extends Controller
 {
-    public function store(StoreAttendanceFileRequest $request, AttendanceFolder $folder)
+    public function store(StoreMinutesFileRequest $request, MinutesFolder $folder)
     {
         $uploaded = [];
         foreach ($request->file('files') as $file) {
             $uuid = (string) Str::uuid();
             $ext = $file->getClientOriginalExtension();
-            $stored = "attendance/{$folder->id}/{$uuid}.{$ext}";
-            Storage::disk('local')->putFileAs("attendance/{$folder->id}", $file, "{$uuid}.{$ext}");
+            $stored = "minutes/{$folder->id}/{$uuid}.{$ext}";
+            Storage::disk('local')->putFileAs("minutes/{$folder->id}", $file, "{$uuid}.{$ext}");
 
-            $nextOrder = AttendanceFile::where('attendance_folder_id', $folder->id)->max('sort_order') ?? 0;
+            $nextOrder = MinutesFile::where('minutes_folder_id', $folder->id)->max('sort_order') ?? 0;
 
-            $af = AttendanceFile::create([
-                'attendance_folder_id' => $folder->id,
+            $af = MinutesFile::create([
+                'minutes_folder_id' => $folder->id,
                 'original_filename' => $file->getClientOriginalName(),
                 'stored_path' => $stored,
                 'mime_type' => $file->getClientMimeType(),
@@ -37,19 +37,19 @@ class AttendanceFileController extends Controller
             $uploaded[] = $af;
         }
 
-        return redirect()->route('attendance.show', $folder)->with('success','Files uploaded.');
+        return redirect()->route('minutes.show', $folder)->with('success','Files uploaded.');
     }
 
-    public function show(AttendanceFolder $folder, AttendanceFile $file)
+    public function show(MinutesFolder $folder, MinutesFile $file)
     {
         // ensure file belongs to folder
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->minutes_folder_id !== $folder->id) {
             abort(404);
         }
 
-        if (! session()->get("attendance_file_view_verified.{$file->id}", false)) {
-            return redirect()->route('attendance.show', $folder)
-                ->with('warning', 'Please enter the attendance password to view this file.')
+        if (! session()->get("minutes_file_view_verified.{$file->id}", false)) {
+            return redirect()->route('minutes.show', $folder)
+                ->with('warning', 'Please enter the minutes password to view this file.')
                 ->withInput(['file_id' => $file->id]);
         }
 
@@ -58,32 +58,32 @@ class AttendanceFileController extends Controller
         return response()->file($path);
     }
 
-    public function verify(Request $request, AttendanceFolder $folder, AttendanceFile $file)
+    public function verify(Request $request, MinutesFolder $folder, MinutesFile $file)
     {
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->minutes_folder_id !== $folder->id) {
             abort(404);
         }
 
         $request->validate([
-            'attendance_password' => 'required|string',
+        'attendance_password' => 'required|string',
         ]);
 
         $hashedPassword = Setting::get('attendance_password');
 
         if (! $hashedPassword || ! Hash::check($request->input('attendance_password'), $hashedPassword)) {
-            return redirect()->route('attendance.show', $folder)
+            return redirect()->route('minutes.show', $folder)
                 ->withErrors(['attendance_password' => 'Invalid attendance password.'])
                 ->withInput(['file_id' => $file->id]);
         }
 
-        session()->put("attendance_file_view_verified.{$file->id}", true);
+        session()->put("minutes_file_view_verified.{$file->id}", true);
 
-        return redirect()->route('attendance.files.show', [$folder, $file]);
+        return redirect()->route('minutes.files.show', [$folder, $file]);
     }
 
-    public function destroy(AttendanceFolder $folder, AttendanceFile $file)
+    public function destroy(MinutesFolder $folder, MinutesFile $file)
     {
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->minutes_folder_id !== $folder->id) {
             abort(404);
         }
 
@@ -91,15 +91,15 @@ class AttendanceFileController extends Controller
         Storage::disk('local')->delete($file->stored_path);
         $file->delete();
 
-        return redirect()->route('attendance.show', $folder)->with('success','File deleted.');
+        return redirect()->route('minutes.show', $folder)->with('success','File deleted.');
     }
 
-    public function bulkDestroy(Request $request, AttendanceFolder $folder)
+    public function bulkDestroy(Request $request, MinutesFolder $folder)
     {
         $fileIds = $request->input('file_ids', []);
 
         if (!empty($fileIds)) {
-            $files = AttendanceFile::where('attendance_folder_id', $folder->id)
+            $files = MinutesFile::where('minutes_folder_id', $folder->id)
                 ->whereIn('id', $fileIds)
                 ->get();
 
@@ -109,15 +109,15 @@ class AttendanceFileController extends Controller
             }
         }
 
-        return redirect()->route('attendance.show', $folder)->with('success','Selected files deleted.');
+        return redirect()->route('minutes.show', $folder)->with('success','Selected files deleted.');
     }
 
-    public function reorder(Request $request, AttendanceFolder $folder)
+    public function reorder(Request $request, MinutesFolder $folder)
     {
         $order = $request->input('order', []);
 
         foreach ($order as $index => $fileId) {
-            AttendanceFile::where('attendance_folder_id', $folder->id)
+            MinutesFile::where('minutes_folder_id', $folder->id)
                 ->where('id', $fileId)
                 ->update(['sort_order' => $index + 1]);
         }

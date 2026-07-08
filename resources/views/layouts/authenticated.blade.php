@@ -41,9 +41,9 @@
                         </a>
                     </li>
                     <li>
-                        <a href="#" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition">
+                        <a href="{{ route('minutes.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('minutes.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                             <span class="mr-3 text-base">📄</span>
-                            Minutes Documents (coming)
+                            Minutes Documents
                         </a>
                     </li>
                     <li>
@@ -52,6 +52,14 @@
                             Archives (coming)
                         </a>
                     </li>
+                    @if(auth()->user()->isAdmin())
+                        <li>
+                            <a href="{{ route('settings.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('settings.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                                <span class="mr-3 text-base">⚙</span>
+                                Settings
+                            </a>
+                        </li>
+                    @endif
                 </ul>
             </nav>
 
