@@ -15,7 +15,7 @@ class StoreAttendanceFileRequest extends FormRequest
     {
         return [
             'files' => ['required','array'],
-            'files.*' => ['file','mimes:pdf,jpg,jpeg,png'],
+            'files.*' => ['file','mimes:pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,txt,csv'],
         ];
     }
 }

@@ -16,17 +16,31 @@ class MinutesFileController extends Controller
     public function store(StoreMinutesFileRequest $request, MinutesFolder $folder)
     {
         $uploaded = [];
-        foreach ($request->file('files') as $file) {
+        $renamed = [];
+        foreach ($request->file('files') as $index => $file) {
+            if (! $file->isValid() || blank($file->getRealPath())) {
+                return back()->withErrors([
+                    "files.{$index}" => $file->getErrorMessage() ?: 'The uploaded file could not be read from PHP temporary storage.',
+                ])->withInput();
+            }
+
             $uuid = (string) Str::uuid();
             $ext = $file->getClientOriginalExtension();
             $stored = "minutes/{$folder->id}/{$uuid}.{$ext}";
-            Storage::disk('local')->putFileAs("minutes/{$folder->id}", $file, "{$uuid}.{$ext}");
+            $disk = Storage::disk('local');
+            if (! $disk->putFileAs("minutes/{$folder->id}", $file, "{$uuid}.{$ext}")) {
+                return back()->withErrors([
+                    "files.{$index}" => 'The file could not be saved to application storage.',
+                ])->withInput();
+            }
 
             $nextOrder = MinutesFile::where('minutes_folder_id', $folder->id)->max('sort_order') ?? 0;
+            $originalFilename = $file->getClientOriginalName();
+            $displayFilename = $this->uniqueOriginalFilename($originalFilename, $folder->id);
 
             $af = MinutesFile::create([
                 'minutes_folder_id' => $folder->id,
-                'original_filename' => $file->getClientOriginalName(),
+                'original_filename' => $displayFilename,
                 'stored_path' => $stored,
                 'mime_type' => $file->getClientMimeType(),
                 'file_size' => $file->getSize(),
@@ -35,9 +49,34 @@ class MinutesFileController extends Controller
             ]);
 
             $uploaded[] = $af;
+            if ($displayFilename !== $originalFilename) {
+                $renamed[] = "{$originalFilename} -> {$displayFilename}";
+            }
         }
 
-        return redirect()->route('minutes.show', $folder)->with('success','Files uploaded.');
+        $message = 'Files uploaded.';
+        if ($renamed) {
+            $message .= ' Renamed: '.implode(', ', $renamed);
+        }
+
+        return redirect()->route('minutes.show', $folder)->with('success', $message);
+    }
+
+    private function uniqueOriginalFilename(string $originalFilename, int $folderId): string
+    {
+        $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
+        $basename = pathinfo($originalFilename, PATHINFO_FILENAME);
+        $candidate = $originalFilename;
+        $copyNumber = 2;
+
+        while (MinutesFile::where('minutes_folder_id', $folderId)
+            ->where('original_filename', $candidate)
+            ->exists()) {
+            $candidate = $basename.' ('.$copyNumber.')'.($extension ? '.'.$extension : '');
+            $copyNumber++;
+        }
+
+        return $candidate;
     }
 
     public function show(MinutesFolder $folder, MinutesFile $file)
@@ -53,8 +92,14 @@ class MinutesFileController extends Controller
                 ->withInput(['file_id' => $file->id]);
         }
 
+        $disk = Storage::disk('local');
+        if (blank($file->stored_path) || ! $disk->exists($file->stored_path)) {
+            return redirect()->route('minutes.show', $folder)
+                ->with('warning', 'This file is unavailable because its stored file is missing.');
+        }
+
         // stream from storage local disk (private)
-        $path = Storage::disk('local')->path($file->stored_path);
+        $path = $disk->path($file->stored_path);
         return response()->file($path);
     }
 

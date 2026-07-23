@@ -4,6 +4,7 @@ import { bunny } from 'laravel-vite-plugin/fonts';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+    base: '/BAC/public/',
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/css/auth.css', 'resources/js/app.js'],
@@ -17,6 +18,10 @@ export default defineConfig({
         tailwindcss(),
     ],
     server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: '192.168.100.124',
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },

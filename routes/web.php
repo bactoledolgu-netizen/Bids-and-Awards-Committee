@@ -25,3 +25,4 @@ require __DIR__.'/auth.php';
 require __DIR__.'/dashboard.php';
 require __DIR__.'/attendance.php';
 require __DIR__.'/minutes.php';
+require __DIR__.'/notice.php';

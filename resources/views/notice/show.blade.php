@@ -4,21 +4,22 @@
 
 @section('content')
 @php
-    $oldFileId = old('file_id');
+    $oldFileId = old('file_id'); 
     $oldVerifyUrl = $oldFileId ? $folder->files->firstWhere('id', $oldFileId) : null;
     $uploadErrors = array_merge($errors->get('files'), $errors->get('files.*'));
 @endphp
 
-<div x-data="{ openEdit: {{ $errors->any() ? 'true' : 'false' }}, openAction: null, openAddFolder: false, openAddFiles: {{ count($uploadErrors) > 0 ? 'true' : 'false' }}, openPasswordModal: {{ $oldFileId ? 'true' : 'false' }}, openDeleteModal: false, uploading: false, uploadProgress: 0, uploadStatus: 'Preparing your files...', selectedFiles: [], passwordVerifyUrl: {{ $oldVerifyUrl ? json_encode(route('minutes.files.verify', [$folder, $oldVerifyUrl])) : 'null' }}, submitting: false, draggingId: null, reorderUrl: '{{ route('minutes.files.reorder', $folder) }}' }" @upload-start.window="uploading = true; uploadProgress = 0; uploadStatus = 'Preparing your files...'" @upload-progress.window="uploadProgress = $event.detail.percent; uploadStatus = $event.detail.percent < 100 ? 'Uploading your files...' : 'Finishing up...'" @keydown.escape.window="if (!uploading) { openEdit = false; openAction = null; openAddFolder = false; openAddFiles = false; openPasswordModal = false; openDeleteModal = false }" class="max-w-5xl mx-auto">
+<div x-data="{ openEdit: {{ $errors->any() ? 'true' : 'false' }}, openAction: null, openAddFolder: false, openAddFiles: {{ count($uploadErrors) > 0 ? 'true' : 'false' }}, openPasswordModal: {{ $oldFileId ? 'true' : 'false' }}, openDeleteModal: false, uploading: false, uploadProgress: 0, uploadStatus: 'Preparing your files...', selectedFiles: [], passwordVerifyUrl: {{ $oldVerifyUrl ? json_encode(route('notice.files.verify', [$folder, $oldVerifyUrl])) : 'null' }}, submitting: false, draggingId: null, reorderUrl: '{{ route('notice.files.reorder', $folder) }}' }" @upload-start.window="uploading = true; uploadProgress = 0; uploadStatus = 'Preparing your files...'" @upload-progress.window="uploadProgress = $event.detail.percent; uploadStatus = $event.detail.percent < 100 ? 'Uploading your files...' : 'Finishing up...'" @keydown.escape.window="if (!uploading) { openEdit = false; openAction = null; openAddFolder = false; openAddFiles = false; openPasswordModal = false; openDeleteModal = false }" class="max-w-5xl mx-auto">
     <div class="mb-4">
         <nav class="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-            <a href="{{ route('minutes.index') }}" class="text-blue-600 hover:underline">Minutes</a>
+            <a href="{{ route('notice.index') }}" class="text-blue-600 hover:underline">Notice</a>
             @foreach ($ancestors as $ancestor)
                 <span>/</span>
-                <a href="{{ route('minutes.show', $ancestor) }}" class="text-blue-600 hover:underline">{{ $ancestor->name }}</a>
+                <a href="{{ route('notice.show', $ancestor) }}" class="text-blue-600 hover:underline">{{ $ancestor->name }}</a>
             @endforeach
             <span>/</span>
-            <span class="text-gray-900">@if($folder->folder_date_end)
+            <span class="text-gray-900">
+                    @if($folder->folder_date_end)
                         {{ $folder->folder_date->format('F Y') }} - {{ $folder->folder_date_end->format('F Y') }}
                     @else
                         {{ optional($folder->folder_date)->format('F j, Y') }}
@@ -39,9 +40,9 @@
                 </div>
                 <p class="mt-3 text-gray-700">{{ $folder->description }}</p>
             </div>
-                <form id="file-search-form" method="GET" action="{{ route('minutes.show', $folder) }}" class="relative min-w-[280px]">
-                    <!-- <label for="minutes-file-search" class="sr-only">Search files</label> -->
-                    <input id="minutes-file-search" type="search" name="file_search" value="{{ $fileSearch }}" placeholder="Search files..." autocomplete="off" class="w-full rounded-xl border border-gray-300 px-3 py-2 pr-14 text-sm focus:border-indigo-600 focus:ring-indigo-600" />
+                <form id="file-search-form" method="GET" action="{{ route('notice.show', $folder) }}" class="relative min-w-[280px]">
+                    <!-- <label for="notice-file-search" class="sr-only">Search files</label> -->
+                    <input id="notice-file-search" type="search" name="file_search" value="{{ $fileSearch }}" placeholder="Search files..." autocomplete="off" class="w-full rounded-xl border border-gray-300 px-3 py-2 pr-14 text-sm focus:border-indigo-600 focus:ring-indigo-600" />
                     <!-- <button id="file-search-clear" type="button" class="absolute inset-y-0 right-3 hidden text-sm font-medium text-blue-600 hover:text-blue-800">Clear</button> -->
                 </form>
         </div>
@@ -69,12 +70,12 @@
                     {{ session('warning') }}
                 </div>
             @endif
-            @if($errors->has('minutes_password'))
+            @if($errors->has('notice_password'))
                 <div class="mb-4 rounded-2xl bg-red-50 border border-red-200 p-4 text-red-800">
-                    {{ $errors->first('minutes_password') }}
+                    {{ $errors->first('notice_password') }}
                 </div>
             @endif
-            <form id="bulk-delete-form" method="POST" action="{{ route('minutes.files.bulk-destroy', $folder) }}" class="space-y-3">
+            <form id="bulk-delete-form" method="POST" action="{{ route('notice.files.bulk-destroy', $folder) }}" class="space-y-3">
                 @csrf
                 @method('DELETE')
                 <div class="mb-3 flex items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3">
@@ -100,7 +101,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-3">
-                                <button type="button" @click="passwordVerifyUrl = '{{ route('minutes.files.verify', [$folder, $file]) }}'; openPasswordModal = true" class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50">View</button>
+                                <button type="button" @click="passwordVerifyUrl = '{{ route('notice.files.verify', [$folder, $file]) }}'; openPasswordModal = true" class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50">View</button>
                             </div>
                         </div>
                     @endforeach
@@ -116,12 +117,12 @@
             <div class="flex items-center justify-between px-6 py-5 border-b border-gray-200">
                 <div>
                     <h3 class="text-xl font-semibold">Upload Files</h3>
-                    <p class="text-sm text-gray-500">Add files to this folder for BAC minutes records.</p>
+                    <p class="text-sm text-gray-500">Add files to this folder for BAC notice records.</p>
                 </div>
                 <button type="button" @click="openAddFiles = false" class="text-gray-500 hover:text-gray-900">Close</button>
             </div>
 
-            <form action="{{ route('minutes.files.store', $folder) }}" method="POST" enctype="multipart/form-data" class="file-upload-form space-y-4 px-6 py-6">
+            <form action="{{ route('notice.files.store', $folder) }}" method="POST" enctype="multipart/form-data" class="file-upload-form space-y-4 px-6 py-6">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Choose files</label>
@@ -147,13 +148,13 @@
         <div class="absolute inset-0" @click="openPasswordModal = false"></div>
         <div class="relative w-full max-w-md rounded-3xl bg-white shadow-2xl overflow-hidden">
             <div class="px-6 py-5 border-b border-gray-200">
-                <h3 class="text-xl font-semibold">Enter Minutes Password</h3>
-                <p class="text-sm text-gray-500">This file is protected. Please enter the global minutes password to continue.</p>
+                <h3 class="text-xl font-semibold">Enter Notice Password</h3>
+                <p class="text-sm text-gray-500">This file is protected. Please enter the global notice password to continue.</p>
             </div>
             <form :action="passwordVerifyUrl" method="POST" class="space-y-4 px-6 py-6">
                 @csrf
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Minutes Password</label>
+                    <label class="block text-sm font-medium text-gray-700">Notice Password</label>
                     <input type="password" name="attendance_password" required class="mt-3 block w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 focus:border-[#0f1b3d] focus:outline-none focus:ring-2 focus:ring-[#0f1b3d]/20" />
                 </div>
                 <div class="flex justify-end gap-3">
@@ -232,7 +233,7 @@
 
         const fileList = document.getElementById('file-list');
         const searchForm = document.getElementById('file-search-form');
-        const searchInput = document.getElementById('minutes-file-search');
+        const searchInput = document.getElementById('notice-file-search');
         const clearSearch = document.getElementById('file-search-clear');
         const noSearchResults = document.getElementById('no-search-results');
         const allFileItems = fileList ? Array.from(fileList.children) : [];
@@ -277,7 +278,7 @@
                         items.splice(fromIndex, 1);
                         items.splice(toIndex, 0, draggedFile);
                         fileList.replaceChildren(...items);
-                        fetch('{{ route('minutes.files.reorder', $folder) }}', {
+                        fetch('{{ route('notice.files.reorder', $folder) }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
