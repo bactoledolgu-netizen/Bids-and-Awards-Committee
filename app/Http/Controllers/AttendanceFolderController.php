@@ -67,12 +67,17 @@ class AttendanceFolderController extends Controller
         return redirect()->route('attendance.index')->with('success', 'Folder created.');
     }
 
-    public function show(AttendanceFolder $folder)
+    public function show(Request $request, AttendanceFolder $folder)
     {
-        $folder->load(['files', 'children']);
+        $folder->load(['children']);
+        $fileSearch = trim((string) $request->input('file_search', ''));
+        $files = $folder->files()
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
         $ancestors = $folder->ancestors();
 
-        return view('attendance.show', compact('folder', 'ancestors'));
+        return view('attendance.show', compact('folder', 'ancestors', 'files', 'fileSearch'));
     }
 
     public function edit(AttendanceFolder $folder)

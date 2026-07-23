@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreAttendanceFileRequest;
-use App\Models\AttendanceFolder;
-use App\Models\AttendanceFile;
+use App\Http\Requests\StoreNoticeFileRequest;
+use App\Models\NoticeFolder;
+use App\Models\NoticeFile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\Setting;
 
-class AttendanceFileController extends Controller
+class NoticeFileController extends Controller
 {
-    public function store(StoreAttendanceFileRequest $request, AttendanceFolder $folder)
+    public function store(StoreNoticeFileRequest $request, NoticeFolder $folder)
     {
         $uploaded = [];
         $renamed = [];
@@ -26,20 +26,20 @@ class AttendanceFileController extends Controller
 
             $uuid = (string) Str::uuid();
             $ext = $file->getClientOriginalExtension();
-            $stored = "attendance/{$folder->id}/{$uuid}.{$ext}";
+            $stored = "notice/{$folder->id}/{$uuid}.{$ext}";
             $disk = Storage::disk('local');
-            if (! $disk->putFileAs("attendance/{$folder->id}", $file, "{$uuid}.{$ext}")) {
+            if (! $disk->putFileAs("notice/{$folder->id}", $file, "{$uuid}.{$ext}")) {
                 return back()->withErrors([
                     "files.{$index}" => 'The file could not be saved to application storage.',
                 ])->withInput();
             }
 
-            $nextOrder = AttendanceFile::where('attendance_folder_id', $folder->id)->max('sort_order') ?? 0;
+            $nextOrder = NoticeFile::where('notice_folder_id', $folder->id)->max('sort_order') ?? 0;
             $originalFilename = $file->getClientOriginalName();
             $displayFilename = $this->uniqueOriginalFilename($originalFilename, $folder->id);
 
-            $af = AttendanceFile::create([
-                'attendance_folder_id' => $folder->id,
+            $af = NoticeFile::create([
+                'notice_folder_id' => $folder->id,
                 'original_filename' => $displayFilename,
                 'stored_path' => $stored,
                 'mime_type' => $file->getClientMimeType(),
@@ -59,7 +59,7 @@ class AttendanceFileController extends Controller
             $message .= ' Renamed: '.implode(', ', $renamed);
         }
 
-        return redirect()->route('attendance.show', $folder)->with('success', $message);
+        return redirect()->route('notice.show', $folder)->with('success', $message);
     }
 
     private function uniqueOriginalFilename(string $originalFilename, int $folderId): string
@@ -69,7 +69,7 @@ class AttendanceFileController extends Controller
         $candidate = $originalFilename;
         $copyNumber = 2;
 
-        while (AttendanceFile::where('attendance_folder_id', $folderId)
+        while (NoticeFile::where('notice_folder_id', $folderId)
             ->where('original_filename', $candidate)
             ->exists()) {
             $candidate = $basename.' ('.$copyNumber.')'.($extension ? '.'.$extension : '');
@@ -79,22 +79,22 @@ class AttendanceFileController extends Controller
         return $candidate;
     }
 
-    public function show(AttendanceFolder $folder, AttendanceFile $file)
+    public function show(NoticeFolder $folder, NoticeFile $file)
     {
         // ensure file belongs to folder
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->notice_folder_id !== $folder->id) {
             abort(404);
         }
 
-        if (! session()->get("attendance_file_view_verified.{$file->id}", false)) {
-            return redirect()->route('attendance.show', $folder)
-                ->with('warning', 'Please enter the attendance password to view this file.')
+        if (! session()->get("notice_file_view_verified.{$file->id}", false)) {
+            return redirect()->route('notice.show', $folder)
+                ->with('warning', 'Please enter the notice password to view this file.')
                 ->withInput(['file_id' => $file->id]);
         }
 
         $disk = Storage::disk('local');
         if (blank($file->stored_path) || ! $disk->exists($file->stored_path)) {
-            return redirect()->route('attendance.show', $folder)
+            return redirect()->route('notice.show', $folder)
                 ->with('warning', 'This file is unavailable because its stored file is missing.');
         }
 
@@ -103,9 +103,9 @@ class AttendanceFileController extends Controller
         return response()->file($path);
     }
 
-    public function verify(Request $request, AttendanceFolder $folder, AttendanceFile $file)
+    public function verify(Request $request, NoticeFolder $folder, NoticeFile $file)
     {
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->notice_folder_id !== $folder->id) {
             abort(404);
         }
 
@@ -116,19 +116,19 @@ class AttendanceFileController extends Controller
         $hashedPassword = Setting::get('attendance_password');
 
         if (! $hashedPassword || ! Hash::check($request->input('attendance_password'), $hashedPassword)) {
-            return redirect()->route('attendance.show', $folder)
+            return redirect()->route('notice.show', $folder)
                 ->withErrors(['attendance_password' => 'Invalid attendance password.'])
                 ->withInput(['file_id' => $file->id]);
         }
 
-        session()->put("attendance_file_view_verified.{$file->id}", true);
+        session()->put("notice_file_view_verified.{$file->id}", true);
 
-        return redirect()->route('attendance.files.show', [$folder, $file]);
+        return redirect()->route('notice.files.show', [$folder, $file]);
     }
 
-    public function destroy(AttendanceFolder $folder, AttendanceFile $file)
+    public function destroy(NoticeFolder $folder, NoticeFile $file)
     {
-        if ($file->attendance_folder_id !== $folder->id) {
+        if ($file->notice_folder_id !== $folder->id) {
             abort(404);
         }
 
@@ -136,15 +136,15 @@ class AttendanceFileController extends Controller
         Storage::disk('local')->delete($file->stored_path);
         $file->delete();
 
-        return redirect()->route('attendance.show', $folder)->with('success','File deleted.');
+        return redirect()->route('notice.show', $folder)->with('success','File deleted.');
     }
 
-    public function bulkDestroy(Request $request, AttendanceFolder $folder)
+    public function bulkDestroy(Request $request, NoticeFolder $folder)
     {
         $fileIds = $request->input('file_ids', []);
 
         if (!empty($fileIds)) {
-            $files = AttendanceFile::where('attendance_folder_id', $folder->id)
+            $files = NoticeFile::where('notice_folder_id', $folder->id)
                 ->whereIn('id', $fileIds)
                 ->get();
 
@@ -154,15 +154,15 @@ class AttendanceFileController extends Controller
             }
         }
 
-        return redirect()->route('attendance.show', $folder)->with('success','Selected files deleted.');
+        return redirect()->route('notice.show', $folder)->with('success','Selected files deleted.');
     }
 
-    public function reorder(Request $request, AttendanceFolder $folder)
+    public function reorder(Request $request, NoticeFolder $folder)
     {
         $order = $request->input('order', []);
 
         foreach ($order as $index => $fileId) {
-            AttendanceFile::where('attendance_folder_id', $folder->id)
+            NoticeFile::where('notice_folder_id', $folder->id)
                 ->where('id', $fileId)
                 ->update(['sort_order' => $index + 1]);
         }

@@ -8,7 +8,7 @@
         <div class="flex items-center justify-between mb-6">
             <div>
                 <h1 class="text-2xl font-semibold">Settings</h1>
-                <p class="text-sm text-gray-500">Manage the global attendance file view password.</p>
+                <p class="text-sm text-gray-500">Manage the file view password.</p>
             </div>
         </div>
 

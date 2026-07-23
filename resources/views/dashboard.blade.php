@@ -10,7 +10,7 @@
         <div class="flex-1">
             <!-- <div class="text-sm uppercase text-yellow-300">Welcome back</div> -->
             <div class="text-2xl font-semibold">{{ auth()->user()->name }}</div>
-            <div class="text-sm text-white/80 mt-1">{{ auth()->user()->position_title ?? 'System Administrator' }} · BAC Chairperson</div>
+            <!-- <div class="text-sm text-white/80 mt-1">{{ auth()->user()->position_title ?? 'System Administrator' }} · BAC Chairperson</div> -->
         </div>
         <div class="text-right">
             <div class="text-sm text-white/80">Today</div>

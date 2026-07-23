@@ -20,7 +20,7 @@
         <aside class="flex w-72 flex-col border-r border-slate-200 bg-white/80  shadow-sm backdrop-blur">
             <div class="mb-8 bg-[#0f1b3d] px-4 py-6 text-center text-white shadow-sm">
                 <div class="inline-flex items-center text-center rounded-full bg-[#0f1b3d] px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-white">
-                    Bidding and Awards Committee Office
+                    Bids and Awards Committee Office
                 </div>
                 <!-- <div class="mt-4 text-lg font-semibold text-slate-900">Bidding and Awards Committee</div> -->
                 <div class="text-sm text-slate-500 text-center text text-white" >Toledo City Hall</div>
@@ -44,6 +44,12 @@
                         <a href="{{ route('minutes.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('minutes.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
                             <span class="mr-3 text-base">📄</span>
                             Minutes Documents
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('notice.index') }}" class="flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition {{ request()->routeIs('notice.*') ? 'bg-[#0f1b3d] text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' }}">
+                            <span class="mr-3 text-base">📄</span>
+                            Notice Documents
                         </a>
                     </li>
                     <li>

@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreMinutesFolderRequest;
-use App\Http\Requests\UpdateMinutesFolderRequest;
-use App\Models\MinutesFolder;
+use App\Http\Requests\StoreNoticeFolderRequest;
+use App\Http\Requests\UpdateNoticeFolderRequest;
+use App\Models\NoticeFolder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
-class MinutesFolderController extends Controller
+class NoticeFolderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = MinutesFolder::whereNull('parent_id');
+        $query = NoticeFolder::query();
+
+        if (Schema::hasColumn('notice_folders', 'parent_id')) {
+            $query->whereNull('parent_id');
+        }
 
         if ($search = $request->input('q')) {
             $query->where('name', 'like', "%{$search}%");
@@ -33,15 +37,15 @@ class MinutesFolderController extends Controller
             })
             ->sortKeysDesc();
 
-        return view('minutes.index', compact('groupedFolders'));
+        return view('notice.index', compact('groupedFolders'));
     }
 
     public function create()
     {
-        return view('minutes.create');
+        return view('notice.create');
     }
 
-    public function store(StoreMinutesFolderRequest $request)
+    public function store(StoreNoticeFolderRequest $request)
     {
         $data = $request->validated();
         $data['created_by'] = auth()->id();
@@ -52,7 +56,7 @@ class MinutesFolderController extends Controller
             $data['folder_date'] = $data['folder_date'] ?? now()->toDateString();
         }
 
-        if (Schema::hasColumn('minutes_folders', 'folder_date_end')) {
+        if (Schema::hasColumn('notice_folders', 'folder_date_end')) {
             if (! empty($data['end_month']) && ! empty($data['end_year'])) {
                 $data['folder_date_end'] = now()->setDate($data['end_year'], $data['end_month'], 1)->endOfMonth()->toDateString();
             } elseif (! empty($data['folder_date'])) {
@@ -62,12 +66,12 @@ class MinutesFolderController extends Controller
 
         unset($data['start_month'], $data['start_year'], $data['end_month'], $data['end_year']);
 
-        $folder = MinutesFolder::create($data);
+        $folder = NoticeFolder::create($data);
 
-        return redirect()->route('minutes.index')->with('success', 'Folder created.');
+        return redirect()->route('notice.index')->with('success', 'Folder created.');
     }
 
-    public function show(Request $request, MinutesFolder $folder)
+    public function show(Request $request, NoticeFolder $folder)
     {
         $folder->load(['children']);
         $fileSearch = trim((string) $request->input('file_search', ''));
@@ -77,15 +81,15 @@ class MinutesFolderController extends Controller
             ->get();
         $ancestors = $folder->ancestors();
 
-        return view('minutes.show', compact('folder', 'ancestors', 'files', 'fileSearch'));
+        return view('notice.show', compact('folder', 'ancestors', 'files', 'fileSearch'));
     }
 
-    public function edit(MinutesFolder $folder)
+    public function edit(NoticeFolder $folder)
     {
-        return redirect()->route('minutes.show', $folder);
+        return redirect()->route('notice.show', $folder);
     }
 
-    public function update(UpdateMinutesFolderRequest $request, MinutesFolder $folder)
+    public function update(UpdateNoticeFolderRequest $request, NoticeFolder $folder)
     {
         $data = $request->validated();
 
@@ -93,7 +97,7 @@ class MinutesFolderController extends Controller
             $data['folder_date'] = now()->setDate($data['start_year'], $data['start_month'], 1)->toDateString();
         }
 
-        if (Schema::hasColumn('minutes_folders', 'folder_date_end')) {
+        if (Schema::hasColumn('notice_folders', 'folder_date_end')) {
             if (! empty($data['end_month']) && ! empty($data['end_year'])) {
                 $data['folder_date_end'] = now()->setDate($data['end_year'], $data['end_month'], 1)->endOfMonth()->toDateString();
             } elseif (array_key_exists('end_month', $data) && array_key_exists('end_year', $data)) {
@@ -105,18 +109,18 @@ class MinutesFolderController extends Controller
 
         $folder->update($data);
 
-        return redirect()->route('minutes.index')->with('success','Folder updated.');
+        return redirect()->route('notice.index')->with('success','Folder updated.');
     }
 
-    public function destroy(MinutesFolder $folder)
+    public function destroy(NoticeFolder $folder)
     {
         $parent = $folder->parent;
         $folder->delete();
 
         if ($parent) {
-            return redirect()->route('minutes.show', $parent)->with('success', 'Folder deleted (soft).');
+            return redirect()->route('notice.show', $parent)->with('success', 'Folder deleted (soft).');
         }
 
-        return redirect()->route('minutes.index')->with('success', 'Folder deleted (soft).');
+        return redirect()->route('notice.index')->with('success', 'Folder deleted (soft).');
     }
 }
